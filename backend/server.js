@@ -12,9 +12,9 @@ app.use(express.json());
 const cache = new NodeCache();
 const METEO_API = 'https://api.meteo.lt/v1';
 
-app.get('/api/places', async (req, res) => { try {const search = (req.query.search || '').toLowerCase();
+app.get('/api/places', async (req, res) => {
     let places = cache.get('places');
-    if (!places) {
+    if (true) {
       const response = await axios.get(`${METEO_API}/places`);
       places = response.data;
       cache.set('places', places, 60 * 60 * 24);
@@ -23,14 +23,11 @@ app.get('/api/places', async (req, res) => { try {const search = (req.query.sear
       console.log('Places loaded from cache');
     }
 
-    const filteredPlaces = places.filter(place => place.name.toLowerCase().includes(search) || place.code.toLowerCase().includes(search) || place.administrativeDivision?.toLowerCase().includes(search)).slice(0, 20);
+    const filteredPlaces = places;
 
     res.json(filteredPlaces);
-  } catch (error) {
-    console.error('Error loading places:', error.message);
-    res.status(500).json({ message: 'Failed to load places' });
-  }
-});
+  } 
+);
 
 app.get('/api/weather/:placeCode', async (req, res) => {
   try {
