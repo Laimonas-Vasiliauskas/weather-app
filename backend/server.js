@@ -12,10 +12,6 @@ app.use(express.json());
 const cache = new NodeCache();
 const METEO_API = 'https://api.meteo.lt/v1';
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API works' });
-});
-
 app.get('/api/places', async (req, res) => { try {const search = (req.query.search || '').toLowerCase();
     let places = cache.get('places');
     if (!places) {
@@ -57,6 +53,17 @@ app.get('/api/weather/:placeCode', async (req, res) => {
     console.error('Error loading weather:', error.message);
     res.status(500).json({ message: 'Failed to load weather' });
   }
+});
+
+app.post('/log', (req, res) => {
+  const { city } = req.body;
+
+  console.log(`[${new Date().toLocaleString()}] User selected city: ${city}`);
+
+  res.json({
+    message: 'City logged successfully',
+    city: city
+  });
 });
 
 app.listen(PORT, () => {
