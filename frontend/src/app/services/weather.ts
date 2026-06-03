@@ -11,7 +11,7 @@ export class Weather {
   }
 
   getWeather(apiName: string){
-    const url = `http://localhost:3000/weather/${apiName}`;
+    const url = `https://weather-app-vuq7.onrender.com/weather/${apiName}`;
     return this.http.get(url);
   }
 }

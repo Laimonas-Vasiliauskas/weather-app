@@ -9,7 +9,7 @@ export class Logger {
 
   }
   logCity(cityName: string) {
-    const url = `http://localhost:3000/log`;
+    const url = `https://weather-app-vuq7.onrender.com/log`;
     return this.http.post(url, { city: cityName });
   }
 }
