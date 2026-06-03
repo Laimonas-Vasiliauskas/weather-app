@@ -1,13 +1,15 @@
 <div class="weather-page">
   <mat-card class="dropdown">
-    <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline">
       <mat-label>Search city</mat-label>
-      <input matInput [value]="searchText" (input)="onSearch($event)" (focus)="showDropdown = true" placeholder="Search city" [matAutocomplete]="auto">
+      <input matInput [value]="searchText" (input)="onSearch($event)" placeholder="Search city" [matAutocomplete]="auto" />
     </mat-form-field>
     <mat-autocomplete #auto="matAutocomplete">
-      @for (cityName of filteredCities; track cityName.apiName) {
-        <mat-option (click)="selectCity(cityName)">
-          {{ cityName.name }}
+      @for (place of filteredPlaces; track place.code || place.name || $index) {
+        <mat-option (click)="selectPlace(place)">{{ place.name }}
+          @if (place.administrativeDivision) {
+            - {{ place.administrativeDivision }}
+          }
         </mat-option>
       }
     </mat-autocomplete>
@@ -32,9 +34,8 @@
   @if (savedFiveDaysForecast.length > 0) {
     <mat-card>
       <mat-card-title>5 days forecast</mat-card-title>
-
       <mat-card-content class="forecast-grid">
-        @for (day of savedFiveDaysForecast; track day.forecastTimeUtc) {
+        @for (day of savedFiveDaysForecast; track day.forecastTimeUtc || $index) {
           <div class="forecast-card">
             <p>{{ day.forecastTimeUtc.split(' ')[0] }}</p>
             <p>Temperature: {{ day.airTemperature }} °C</p>
@@ -49,10 +50,8 @@
   <mat-card>
     <mat-card-title>Mostly viewed cities</mat-card-title>
     <mat-card-content class="top-cities">
-      @for (viewedCity of viewedCities; track viewedCity.city) {
-        <button mat-raised-button (click)="selectViewedCity(viewedCity.city)">
-          {{ viewedCity.city }}
-        </button>
+      @for (viewedCity of viewedCities; track viewedCity.code || viewedCity.city || $index) {
+        <button mat-raised-button (click)="selectViewedCity(viewedCity)">{{ viewedCity.city }}</button>
       }
     </mat-card-content>
   </mat-card>
