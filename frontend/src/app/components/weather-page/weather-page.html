@@ -15,11 +15,6 @@
     </mat-autocomplete>
     <mat-card-title>Weather Forecast</mat-card-title>
   </mat-card>
-  @if (selectedCity) {
-    <mat-card>
-      <p>Selected city: {{ selectedCity }}</p>
-    </mat-card>
-  }
   @if (currentWeather) {
     <mat-card>
       <mat-card-title>Current weather in {{ selectedCity }}</mat-card-title>
