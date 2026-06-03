@@ -21,7 +21,7 @@
   @if (currentWeather) {
     <mat-card>
       <mat-card-title>Current weather in {{ selectedCity }}</mat-card-title>
-      <mat-card-content>
+      <mat-card-content class="forecast-card">
         <p>Temperature: {{ currentWeather.airTemperature }} °C</p>
         <p>Wind: {{ currentWeather.windSpeed }} m/s</p>
         <p>Humidity: {{ currentWeather.relativeHumidity }} %</p>
