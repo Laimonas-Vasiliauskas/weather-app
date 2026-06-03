@@ -2,8 +2,7 @@
   display: block;
   min-height: 100vh;
   padding: 32px 0;
-
-  background: linear-gradient(rgba(10, 20, 35, 0.55), rgba(10, 20, 35, 0.65)), url('/assets/weather-bg.jpg');
+  background: url('/weather-bg.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -16,21 +15,11 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+  color: #f4f7fb;
 }
 mat-card {
-  border-radius: 22px;
   padding: 24px;
-
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.28);
-
-  backdrop-filter: blur(8px);
-}
-.dropdown {
-display: grid;
-grid-template-columns: 360px 1fr;
-align-items: center;
-gap: 24px;
+  background-color: rgba(68, 103, 129, 0.92);
 }
 .dropdown {
   display: grid;
@@ -41,33 +30,49 @@ gap: 24px;
 mat-form-field {
   width: 100%;
 }
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: #ffffff !important;
+  border-radius: 12px !important;
+}
+:host ::ng-deep .mat-mdc-input-element {
+  color: #1c2433 !important;
+  caret-color: #1c2433 !important;
+}
+:host ::ng-deep input::placeholder {
+  color: rgba(28, 36, 51, 0.6) !important;
+}
+:host ::ng-deep .mat-mdc-form-field-label,
+:host ::ng-deep .mdc-floating-label {
+  color: #1c2433 !important;
+}
+:host ::ng-deep .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-notched-outline__trailing {
+  border-color: #ffffff !important;
+}
+:host ::ng-deep .mat-focused .mdc-notched-outline__leading,
+:host ::ng-deep .mat-focused .mdc-notched-outline__notch,
+:host ::ng-deep .mat-focused .mdc-notched-outline__trailing {
+border-color: #ffffff !important;
+}
 mat-card-title {
   display: block;
   text-align: center;
   font-size: 26px;
-  font-weight: 600;
-}
-mat-card p {
-  font-size: 15px;
-  margin: 8px 0;
+  padding: 20px;
 }
 .forecast-card {
-  background: rgba(238, 253, 253, 0.88);
-  border-radius: 18px;
   padding: 24px;
   text-align: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .forecast-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 20px;
-}
-.forecast-grid .forecast-card {
-  min-height: 190px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 .top-cities {
   display: flex;
@@ -75,16 +80,19 @@ mat-card p {
   flex-wrap: wrap;
   gap: 14px;
 }
+.form-mat input{
+  background: white;
+}
 .top-cities button {
   border-radius: 999px;
   padding: 8px 22px;
-  font-weight: 600;
+  background-color: rgba(68, 103, 129, 0.92);
+  color: #f4f7fb;
 }
 .current-weather-card {
-  background: #eefdfd;
-  border-radius: 14px;
   padding: 28px;
   text-align: center;
+  font-size: larger;
 }
 @media (max-width: 900px) {
   .dropdown {

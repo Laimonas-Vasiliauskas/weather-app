@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Weather, Place } from '../../services/weather';
 import { Logger } from '../../services/logger';
+import { OnInit } from '@angular/core';
 
 interface ViewedCity {
   city: string;
@@ -30,7 +31,7 @@ interface ViewedCity {
   templateUrl: './weather-page.html',
   styleUrl: './weather-page.scss',
 })
-export class WeatherPage {
+export class WeatherPage implements OnInit {
   selectedCity = '';
   searchText = '';
 
@@ -48,17 +49,16 @@ export class WeatherPage {
       this.viewedCities = JSON.parse(savedCities);
     }
   }
-
+  ngOnInit() {
+    this.weatherService.loadPlaces().subscribe();
+  }
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchText = inputElement.value;
-    if (this.searchText.trim().length < 2) {
-      this.filteredPlaces = [];
-      this.showDropdown = false;
-      return;
-    }
 
-    this.weatherService.searchPlaces(this.searchText).subscribe((places: Place[]) => {this.filteredPlaces = places; this.showDropdown = true;});
+    this.weatherService.filterPlaces(this.searchText).subscribe((places: Place[]) => {
+      this.filteredPlaces = places;
+    });
   }
 
   selectPlace(place: Place) {
@@ -74,18 +74,18 @@ export class WeatherPage {
     this.weatherService.getWeather(place.code).subscribe((response: any) => {this.forecastTimestamps = response.forecastTimestamps; this.currentWeather = response.forecastTimestamps[0]; this.savedFiveDaysForecast = this.fiveDaysForecast();});
   }
 
-selectViewedCity(viewedCity: ViewedCity) {
-  if (!viewedCity.code) {
-    console.error('City code is missing:', viewedCity);
-    return;
-  }
-  const place: Place = {
-    code: viewedCity.code,
-    name: viewedCity.city
-  };
+  selectViewedCity(viewedCity: ViewedCity) {
+    if (!viewedCity.code) {
+      console.error('City code is missing:', viewedCity);
+      return;
+    }
+    const place: Place = {
+      code: viewedCity.code,
+      name: viewedCity.city
+    };
 
-  this.selectPlace(place);
-}
+    this.selectPlace(place);
+  }
 
   fiveDaysForecast() {
     const usedDates: string[] = [];
@@ -101,7 +101,6 @@ selectViewedCity(viewedCity: ViewedCity) {
     }
     return fiveDays;
   }
-
   saveViewedCity(place: Place) {
     const storedCity = this.viewedCities.find(
       viewedCity => viewedCity.code === place.code
@@ -115,4 +114,5 @@ selectViewedCity(viewedCity: ViewedCity) {
     this.viewedCities = this.viewedCities.slice(0, 3);
     localStorage.setItem('topCities', JSON.stringify(this.viewedCities));
   }
+
 }

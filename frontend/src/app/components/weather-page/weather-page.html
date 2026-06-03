@@ -2,7 +2,7 @@
   <mat-card class="dropdown">
         <mat-form-field appearance="outline">
       <mat-label>Search city</mat-label>
-      <input matInput [value]="searchText" (input)="onSearch($event)" placeholder="Search city" [matAutocomplete]="auto" />
+      <input matInput [value]="searchText" (input)="onSearch($event)" [matAutocomplete]="auto" />
     </mat-form-field>
     <mat-autocomplete #auto="matAutocomplete">
       @for (place of filteredPlaces; track place.code || place.name || $index) {
