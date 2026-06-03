@@ -16,10 +16,6 @@ app.get('/', (req, res) => {
   res.send('Weather backend is running');
 });
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API works' });
-});
-
 app.get('/api/places', async (req, res) => {
   try {
     const search = (req.query.search || '').toLowerCase();
