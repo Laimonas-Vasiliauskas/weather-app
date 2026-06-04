@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
+
+const pool = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,7 +12,18 @@ app.use(express.json());
 
 const METEO_API_URL = 'https://api.meteo.lt/v1';
 
-let cityLogs = [];
+// Create DB table
+async function createTables() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS city_logs (
+      id SERIAL PRIMARY KEY,
+      city TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  console.log('Database tables checked');
+}
 
 // Test route
 app.get('/', (req, res) => {
@@ -37,7 +51,7 @@ app.get('/api/places', async (req, res) => {
     res.json(filteredPlaces);
   } catch (error) {
     console.error('Places loading failed:', error);
-    res.status(500).json({ message: 'Nepavyko gauti miestų sąrašo' });
+    res.status(500).json({ message: 'Failed to load places list' });
   }
 });
 
@@ -55,28 +69,76 @@ app.get('/api/weather/:placeCode', async (req, res) => {
     res.json(weather);
   } catch (error) {
     console.error('Weather loading failed:', error);
-    res.status(500).json({ message: 'Nepavyko gauti orų prognozės' });
+    res.status(500).json({ message: 'Failed to load weather forecast' });
   }
 });
 
-// Log selected city
-app.post('/api/log', (req, res) => {
-  const city = req.body.city;
+// Log selected city to DB
+app.post('/api/log', async (req, res) => {
+  try {
+    const city = req.body.city;
 
-  if (!city) {
-    return res.status(400).json({ message: 'Miestas nebuvo atsiųstas' });
+    if (!city) {
+      return res.status(400).json({ message: 'City was not provided' });
+    }
+
+    await pool.query(
+      `INSERT INTO city_logs (city) VALUES ($1)`,
+      [city]
+    );
+
+    console.log('Selected city saved to DB:', city);
+
+    res.json({ message: 'City logged successfully' });
+  } catch (error) {
+    console.error('City log saving failed:', error);
+    res.status(500).json({ message: 'Failed to save city log' });
   }
+});
 
-  cityLogs.push({
-    city: city,
-    date: new Date()
+// Get all logs
+app.get('/api/logs', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, city, created_at
+      FROM city_logs
+      ORDER BY created_at DESC
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Logs loading failed:', error);
+    res.status(500).json({ message: 'Failed to load logs' });
+  }
+});
+
+// Get top 3 cities
+app.get('/api/top-cities', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        city,
+        COUNT(*)::int AS views
+      FROM city_logs
+      GROUP BY city
+      ORDER BY views DESC
+      LIMIT 3
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Top cities loading failed:', error);
+    res.status(500).json({ message: 'Failed to load top cities' });
+  }
+});
+
+// Start server
+createTables()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch(error => {
+    console.error('Failed to start server:', error);
   });
-
-  console.log('Selected city:', city);
-
-  res.json({ message: 'City logged successfully' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
