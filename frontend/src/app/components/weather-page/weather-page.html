@@ -1,52 +1,80 @@
 <div class="weather-page">
   <mat-card class="dropdown">
-        <mat-form-field appearance="outline">
-      <mat-label>Search city</mat-label>
-      <input matInput [value]="searchText" (input)="onSearch($event)" [matAutocomplete]="auto" />
-    </mat-form-field>
-    <mat-autocomplete #auto="matAutocomplete">
-      @for (place of filteredPlaces; track place.code || place.name || $index) {
-        <mat-option (click)="selectPlace(place)">{{ place.name }}
-          @if (place.administrativeDivision) {
-            - {{ place.administrativeDivision }}
+    <div class="search-wrapper">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Search city</mat-label>
+
+        <input
+          matInput
+          [value]="searchText"
+          (input)="onSearch($event)"
+          (keydown.enter)="onEnter($event)"
+        />
+      </mat-form-field>
+
+      @if (filteredPlaces.length > 0) {
+        <div class="custom-dropdown">
+          @for (place of filteredPlaces; track place.code || place.name || $index) {
+            <button
+              type="button"
+              class="custom-option"
+              (mousedown)="selectPlace(place)"
+            >
+              {{ place.name }}
+
+              @if (place.administrativeDivision) {
+                - {{ place.administrativeDivision }}
+              }
+            </button>
           }
-        </mat-option>
+        </div>
       }
-    </mat-autocomplete>
+    </div>
+
     <mat-card-title>Weather Forecast</mat-card-title>
   </mat-card>
+
   @if (currentWeather) {
     <mat-card>
       <mat-card-title>Current weather in {{ selectedCity }}</mat-card-title>
+
       <mat-card-content class="current-weather-card">
-        <p>Temperature: {{ currentWeather.airTemperature }} °C</p>
+        <p>{{ currentWeather.airTemperature }} °C</p>
         <p>Wind: {{ currentWeather.windSpeed }} m/s</p>
         <p>Humidity: {{ currentWeather.relativeHumidity }} %</p>
-        <p>Condition: {{ currentWeather.conditionCode }}</p>
       </mat-card-content>
     </mat-card>
   }
+
   @if (savedFiveDaysForecast.length > 0) {
     <mat-card>
       <mat-card-title>5 days forecast</mat-card-title>
+
       <mat-card-content class="forecast-grid">
         @for (day of savedFiveDaysForecast; track day.forecastTimeUtc || $index) {
           <div class="forecast-card">
             <p>{{ day.forecastTimeUtc.split(' ')[0] }}</p>
-            <p>Temperature: {{ day.airTemperature }} °C</p>
+            <p>{{ day.airTemperature }} °C</p>
             <p>Wind: {{ day.windSpeed }} m/s</p>
             <p>Humidity: {{ day.relativeHumidity }} %</p>
-            <p>Condition: {{ day.conditionCode }}</p>
           </div>
         }
       </mat-card-content>
     </mat-card>
   }
+
   <mat-card>
     <mat-card-title>Mostly viewed cities</mat-card-title>
+
     <mat-card-content class="top-cities">
       @for (viewedCity of viewedCities; track viewedCity.code || viewedCity.city || $index) {
-        <button mat-raised-button (click)="selectViewedCity(viewedCity)">{{ viewedCity.city }}</button>
+        <button
+          type="button"
+          mat-raised-button
+          (click)="selectViewedCity(viewedCity)"
+        >
+          {{ viewedCity.city }}
+        </button>
       }
     </mat-card-content>
   </mat-card>

@@ -36,8 +36,7 @@ export class Weather {
   filterPlaces(searchText: string): Observable<Place[]> {
     const search = searchText.toLowerCase().trim();
 
-    return this.loadPlaces().pipe(
-      map((places: Place[]) => {
+    return this.loadPlaces().pipe(map((places: Place[]) => {
         if (search.length < 2) {
           return [];
         }
