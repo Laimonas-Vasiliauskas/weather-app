@@ -162,7 +162,6 @@ export class WeatherPage implements OnInit {
     this.weatherService.getWeather(placeCode).subscribe({
       next: response => {
         this.forecastTimestamps = response.forecastTimestamps;
-        console.log(this.forecastTimestamps);
         this.currentWeather = this.forecastTimestamps[0];
         this.savedFiveDaysForecast = this.getFiveDaysForecast();
         this.isWeatherLoading = false;
