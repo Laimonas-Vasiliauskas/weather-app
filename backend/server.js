@@ -1,7 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-const NodeCache = require('node-cache');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,89 +7,76 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const cache = new NodeCache();
-const METEO_API = 'https://api.meteo.lt/v1';
+const METEO_API_URL = 'https://api.meteo.lt/v1';
 
+let cityLogs = [];
+
+// Test route
 app.get('/', (req, res) => {
   res.send('Weather backend is running');
 });
 
+// Get all places
 app.get('/api/places', async (req, res) => {
   try {
-    const search = (req.query.search || '').toLowerCase();
+    const response = await fetch(`${METEO_API_URL}/places`);
+    const places = await response.json();
 
-    let places = cache.get('places');
-
-    if (!places) {
-      const response = await axios.get(`${METEO_API}/places`);
-      places = response.data;
-
-      cache.set('places', places, 60 * 60 * 24);
-
-      console.log('Places loaded from Meteo.lt API');
-    } else {
-      console.log('Places loaded from cache');
-    }
+    const search = req.query.search;
 
     if (!search) {
       return res.json(places);
     }
 
-    const filteredPlaces = places.filter(place => place.name.toLowerCase().includes(search) || place.code.toLowerCase().includes(search) || place.administrativeDivision?.toLowerCase().includes(search)).slice(0, 20);
+    const filteredPlaces = places.filter(place =>
+      place.name.toLowerCase().includes(search.toLowerCase()) ||
+      place.code.toLowerCase().includes(search.toLowerCase()) ||
+      place.administrativeDivision?.toLowerCase().includes(search.toLowerCase())
+    );
 
     res.json(filteredPlaces);
   } catch (error) {
-    console.error('Error loading places:', error.message);
-    res.status(500).json({ message: 'Failed to load places' });
+    console.error('Places loading failed:', error);
+    res.status(500).json({ message: 'Nepavyko gauti miestų sąrašo' });
   }
 });
 
+// Get weather by city code
 app.get('/api/weather/:placeCode', async (req, res) => {
   try {
     const placeCode = req.params.placeCode;
-    const cacheKey = `weather_${placeCode}`;
 
-    let weather = cache.get(cacheKey);
-
-    if (!weather) {
-      const response = await axios.get(
-        `${METEO_API}/places/${placeCode}/forecasts/long-term`
-      );
-
-      weather = response.data;
-
-      cache.set(cacheKey, weather, 60 * 60);
-
-      console.log('Weather loaded from Meteo.lt API');
-    } else {
-      console.log('Weather loaded from cache');
-    }
-
-    console.log(
-      `[${new Date().toLocaleString()}] Selected city: ${weather.place.name} (${weather.place.code})`
+    const response = await fetch(
+      `${METEO_API_URL}/places/${placeCode}/forecasts/long-term`
     );
+
+    const weather = await response.json();
 
     res.json(weather);
   } catch (error) {
-    console.error('Error loading weather:', error.message);
-    res.status(500).json({ message: 'Failed to load weather' });
+    console.error('Weather loading failed:', error);
+    res.status(500).json({ message: 'Nepavyko gauti orų prognozės' });
   }
 });
 
-function logCity(req, res) {
-  const { city } = req.body;
+// Log selected city
+app.post('/api/log', (req, res) => {
+  const city = req.body.city;
 
-  console.log(`[${new Date().toLocaleString()}] User selected city: ${city}`);
+  if (!city) {
+    return res.status(400).json({ message: 'Miestas nebuvo atsiųstas' });
+  }
 
-  res.json({
-    message: 'City logged successfully',
-    city: city
+  cityLogs.push({
+    city: city,
+    date: new Date()
   });
-}
 
-app.post('/log', logCity);
-app.post('/api/log', logCity);
+  console.log('Selected city:', city);
+
+  res.json({ message: 'City logged successfully' });
+});
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
