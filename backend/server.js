@@ -133,12 +133,20 @@ app.get('/api/top-cities', async (req, res) => {
 });
 
 // Start server
-createTables()
-  .then(() => {
+async function startServer() {
+  try {
+    await createTables();
+
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
-  })
-  .catch(error => {
+  } catch (error) {
     console.error('Failed to start server:', error);
-  });
+  }
+}
+
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;
