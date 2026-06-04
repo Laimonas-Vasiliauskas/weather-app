@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatInputModule } from '@angular/material/input';
@@ -32,6 +32,8 @@ export class WeatherPage implements OnInit {
   selectedCity = '';
   searchText = '';
 
+  isItLoading = true;
+
   allPlaces: Place[] = [];
   filteredPlaces: Place[] = [];
   viewedCities: ViewedCity[] = [];
@@ -43,16 +45,18 @@ export class WeatherPage implements OnInit {
   private readonly defaultCityCode = 'vilnius';
   private readonly defaultCityName = 'Vilnius';
   private readonly localStorageKey = 'topCities';
+  isWeatherLoading: boolean = false;
 
   constructor(
     private weatherService: Weather,
-    private loggerService: Logger
+    private loggerService: Logger,
+    private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.loadPlaces();
     this.loadSavedViewedCities();
     this.loadDefaultCity();
-    this.loadPlaces();
   }
 
   loadDefaultCity() {
@@ -63,6 +67,7 @@ export class WeatherPage implements OnInit {
     this.weatherService.loadPlaces().subscribe({
       next: (places: Place[]) => {
         this.allPlaces = places;
+        this.filterPlaces();
       },
       error: error => {
         console.error('Places loading failed:', error);
@@ -149,7 +154,7 @@ export class WeatherPage implements OnInit {
   loadWeather(placeCode: string, cityName: string) {
     this.selectedCity = cityName;
     this.searchText = cityName;
-
+    this.isWeatherLoading = true;
     this.currentWeather = null;
     this.forecastTimestamps = [];
     this.savedFiveDaysForecast = [];
@@ -157,8 +162,11 @@ export class WeatherPage implements OnInit {
     this.weatherService.getWeather(placeCode).subscribe({
       next: response => {
         this.forecastTimestamps = response.forecastTimestamps;
+        console.log(this.forecastTimestamps);
         this.currentWeather = this.forecastTimestamps[0];
         this.savedFiveDaysForecast = this.getFiveDaysForecast();
+        this.isWeatherLoading = false;
+        this.cd.detectChanges();
       },
       error: error => {
         console.error('Weather loading failed:', error);

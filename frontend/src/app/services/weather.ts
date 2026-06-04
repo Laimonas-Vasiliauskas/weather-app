@@ -14,13 +14,11 @@ export interface Place {
 export class Weather {
   private readonly localApiUrl = 'http://localhost:3000/api';
 
-  // Kai deployinsi backendą į Render, čia įrašyk savo Render URL
-  private readonly productionApiUrl = 'https://weather-app-vuq7.onrender.com/api';
-
+  private readonly renderApiUrl = 'https://weather-app-vuq7.onrender.com/api';
   private readonly apiUrl =
     window.location.hostname === 'localhost'
       ? this.localApiUrl
-      : this.productionApiUrl;
+      : this.renderApiUrl;
 
   constructor(private http: HttpClient) {}
 

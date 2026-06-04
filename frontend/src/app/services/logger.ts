@@ -11,7 +11,7 @@ export class Logger {
 
   }
   logCity(cityName: string): Observable<any> {
-    const url = `https://weather-app-vuq7.onrender.com/log`;
+    const url = `https://weather-app-vuq7.onrender.com/log/api`;
     return this.http.post<any>(url, { city: cityName }).pipe(
       catchError((error) => {
         console.error('Logging city failed', error);
@@ -21,7 +21,7 @@ export class Logger {
   }
 }
 export function logCity(cityName: string): Promise<any> {
-  const url = `https://weather-app-vuq7.onrender.com/log`;
+  const url = `https://weather-app-vuq7.onrender.com/log/api`;
   return fetch(url, {method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ city: cityName }),
   }).then((response) => {

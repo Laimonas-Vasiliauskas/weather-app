@@ -11,15 +11,13 @@
           (keydown.enter)="onEnter($event)"
         />
       </mat-form-field>
-
+      @if (isWeatherLoading == true) {
+        <p>Information is loading</p>
+      }
       @if (filteredPlaces.length > 0) {
         <div class="custom-dropdown">
           @for (place of filteredPlaces; track place.code || place.name || $index) {
-            <button
-              type="button"
-              class="custom-option"
-              (mousedown)="selectPlace(place)"
-            >
+            <button type="button"class="custom-option"(mousedown)="selectPlace(place)">
               {{ place.name }}
 
               @if (place.administrativeDivision) {
