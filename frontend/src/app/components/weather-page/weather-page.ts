@@ -5,9 +5,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-
 import { Weather, Place } from '../../services/weather';
 import { Logger } from '../../services/logger';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 interface ViewedCity {
   city: string;
@@ -23,7 +23,8 @@ interface ViewedCity {
     MatInputModule,
     MatFormFieldModule,
     MatButtonModule,
-    MatCardModule
+    MatCardModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './weather-page.html',
   styleUrl: './weather-page.scss',

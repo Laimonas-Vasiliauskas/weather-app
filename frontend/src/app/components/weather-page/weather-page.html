@@ -11,9 +11,6 @@
           (keydown.enter)="onEnter($event)"
         />
       </mat-form-field>
-      @if (isWeatherLoading == true) {
-        <p>Information is loading</p>
-      }
       @if (filteredPlaces.length > 0) {
         <div class="custom-dropdown">
           @for (place of filteredPlaces; track place.code || place.name || $index) {
@@ -32,8 +29,8 @@
     <mat-card-title>Weather Forecast</mat-card-title>
   </mat-card>
 
-  @if (currentWeather) {
-    <mat-card>
+  <mat-card>
+      @if (currentWeather) {
       <mat-card-title>Current weather in {{ selectedCity }}</mat-card-title>
 
       <mat-card-content class="current-weather-card">
@@ -41,9 +38,11 @@
         <p>Wind: {{ currentWeather.windSpeed }} m/s</p>
         <p>Humidity: {{ currentWeather.relativeHumidity }} %</p>
       </mat-card-content>
+    }
+    @else if (isWeatherLoading == true){
+  <mat-card-content class="spinner"><mat-spinner></mat-spinner></mat-card-content>
+    }
     </mat-card>
-  }
-
   @if (savedFiveDaysForecast.length > 0) {
     <mat-card>
       <mat-card-title>5 days forecast</mat-card-title>
