@@ -35,8 +35,6 @@ export class WeatherPage implements OnInit {
   selectedCity = '';
   searchText = '';
 
-  isItLoading = true;
-
   allPlaces: Place[] = [];
   filteredPlaces: Place[] = [];
   viewedCities: ViewedCity[] = [];

@@ -21,9 +21,6 @@
 
   color: #f4f7fb;
 }
-.weather-icon{
-  max-height: 160px;
-}
 mat-card {
   border-radius: 16px;
   background-color: rgba(68, 103, 129, 0.88);
@@ -44,12 +41,6 @@ h1{
 .airTemperature{
   font-size: 40px;
   font-weight: bold;
-}
-.dropdown {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  align-items: center;
-  gap: 24px;
 }
 mat-card-title {
   display: block;
@@ -103,7 +94,7 @@ mat-card-title {
   font-size: xx-large;
 }
 .weather-icon {
-  font-size: 36px;
+  max-height: 160px;
   margin-top: 10px;
 }
 
@@ -129,10 +120,6 @@ p {
 }
 
 @media (max-width: 900px) {
-  .dropdown {
-    grid-template-columns: 1fr;
-  }
-
   .forecast-grid {
     grid-template-columns: repeat(2, 1fr);
   }
