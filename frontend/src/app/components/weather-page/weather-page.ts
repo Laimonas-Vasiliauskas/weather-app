@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { Weather, Place } from '../../services/weather';
 import { Logger } from '../../services/logger';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 interface ViewedCity {
   city: string;
@@ -24,7 +25,8 @@ interface ViewedCity {
     MatFormFieldModule,
     MatButtonModule,
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatAutocompleteModule
   ],
   templateUrl: './weather-page.html',
   styleUrl: './weather-page.scss',
@@ -64,6 +66,15 @@ export class WeatherPage implements OnInit {
     this.loadWeather(this.defaultCityCode, this.defaultCityName);
   }
 
+  getDayName(dateString: string): string {
+  const fixedDate = dateString.replace(' ', 'T');
+  const date = new Date(fixedDate);
+
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long'
+  });
+}
+
   loadPlaces() {
     this.weatherService.loadPlaces().subscribe({
       next: (places: Place[]) => {
@@ -75,7 +86,6 @@ export class WeatherPage implements OnInit {
       }
     });
   }
-
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchText = inputElement.value;

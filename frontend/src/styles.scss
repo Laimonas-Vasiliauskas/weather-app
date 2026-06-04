@@ -24,8 +24,35 @@ body {
   padding: 0;
   min-height: 100%;
   color: #f4f7fb;
+  --mat-sys-outline: #f4f7fb;
 }
-
+:root {
+  @include mat.form-field-overrides((
+    outlined-input-text-color: #f4f7fb,
+    outlined-label-text-color: #f4f7fb,
+    outlined-hover-outline-color: #f4f7fb,
+    outlined-focus-label-text-color: #f4f7fb,
+    outlined-focus-outline-color: #f4f7fb,
+  ));
+}
+.padding-top {
+  padding-top: 20px;
+}
+.padding-left {
+  padding-left: 20px;
+}
+.padding-bottom {
+  padding-bottom: 20px;
+}
+.padding-right {
+  padding-right: 20px;
+}
+.padding {
+  padding: 20px;
+}
+.mat-mdc-card-title{
+  @extend .padding;
+}
 * {
   box-sizing: border-box;
 }

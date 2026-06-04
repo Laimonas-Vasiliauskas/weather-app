@@ -1,42 +1,44 @@
-<div class="weather-page">
-  <mat-card class="dropdown">
-    <div class="search-wrapper">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Search city</mat-label>
-
-        <input
-          matInput
-          [value]="searchText"
-          (input)="onSearch($event)"
-          (keydown.enter)="onEnter($event)"
-        />
-      </mat-form-field>
-      @if (filteredPlaces.length > 0) {
-        <div class="custom-dropdown">
-          @for (place of filteredPlaces; track place.code || place.name || $index) {
-            <button type="button"class="custom-option"(mousedown)="selectPlace(place)">
-              {{ place.name }}
-
-              @if (place.administrativeDivision) {
-                - {{ place.administrativeDivision }}
+<div class="weather-page padding-top">
+  <mat-card>
+    <mat-card-content>
+      <div class="header">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Search city</mat-label>
+          <input
+              matInput
+              [value]="searchText"
+              (input)="onSearch($event)"
+              (keydown.enter)="onEnter($event)"
+              [matAutocomplete]="auto"
+            />
+            <mat-autocomplete (optionSelected) = "selectPlace($event.option.value)" #auto="matAutocomplete">
+              @for (place of filteredPlaces; track place.code || place.name || $index) {
+                <mat-option [value]="place">{{place.name}}</mat-option>
               }
-            </button>
-          }
-        </div>
-      }
-    </div>
-
-    <mat-card-title>Weather Forecast</mat-card-title>
+            </mat-autocomplete>
+          </mat-form-field>
+          <h1>Forecast</h1>
+      </div>
+    </mat-card-content>
   </mat-card>
-
   <mat-card>
       @if (currentWeather) {
       <mat-card-title>Current weather in {{ selectedCity }}</mat-card-title>
-
-      <mat-card-content class="current-weather-card">
-        <p>{{ currentWeather.airTemperature }} °C</p>
-        <p>Wind: {{ currentWeather.windSpeed }} m/s</p>
-        <p>Humidity: {{ currentWeather.relativeHumidity }} %</p>
+      <mat-card-content>
+        <div class="current-weather-card">
+            <img 
+              class="weather-icon"
+              [src]="'/icons/' + currentWeather.conditionCode + '.svg'"
+              [alt]="currentWeather.conditionCode"
+            >
+          <div class="">
+            <p class="airTemperature">{{ currentWeather.airTemperature }} °C</p>
+          </div>
+          <div class="">
+            <p>Wind: {{ currentWeather.windSpeed }} m/s</p>
+            <p>Humidity: {{ currentWeather.relativeHumidity }} %</p>
+          </div>
+        </div>
       </mat-card-content>
     }
     @else if (isWeatherLoading == true){
@@ -46,23 +48,27 @@
   @if (savedFiveDaysForecast.length > 0) {
     <mat-card>
       <mat-card-title>5 days forecast</mat-card-title>
-
-      <mat-card-content class="forecast-grid">
-        @for (day of savedFiveDaysForecast; track day.forecastTimeUtc || $index) {
-          <div class="forecast-card">
-            <p>{{ day.forecastTimeUtc.split(' ')[0] }}</p>
-            <p>{{ day.airTemperature }} °C</p>
-            <p>Wind: {{ day.windSpeed }} m/s</p>
-            <p>Humidity: {{ day.relativeHumidity }} %</p>
-          </div>
-        }
+      <mat-card-content>
+        <div class="current-weather-card forecast-grid">
+          @for (day of savedFiveDaysForecast; track day.forecastTimeUtc || $index) {
+            <div class="forecast-card">
+              <p class="day-name">{{ getDayName(day.forecastTimeUtc) }}</p>
+              <p class="airTemperature">{{ day.airTemperature }} °C</p>
+              <p>Wind: {{ day.windSpeed }} m/s</p>
+              <p>Humidity: {{ day.relativeHumidity }} %</p>
+  
+              <img
+                [src]="'/icons/' + day.conditionCode + '.svg'"
+                [alt]="day.conditionCode"
+              >
+            </div>
+          }
+        </div>
       </mat-card-content>
     </mat-card>
   }
-
   <mat-card>
     <mat-card-title>Mostly viewed cities</mat-card-title>
-
     <mat-card-content class="top-cities">
       @for (viewedCity of viewedCities; track viewedCity.code || viewedCity.city || $index) {
         <button
