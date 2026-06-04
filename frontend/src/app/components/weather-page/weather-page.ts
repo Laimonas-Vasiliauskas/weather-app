@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MatInputModule } from '@angular/material/input';
@@ -40,26 +40,29 @@ export class WeatherPage implements OnInit {
   forecastTimestamps: any[] = [];
   savedFiveDaysForecast: any[] = [];
 
+  private readonly defaultCityCode = 'vilnius';
+  private readonly defaultCityName = 'Vilnius';
+  private readonly localStorageKey = 'topCities';
+
   constructor(
     private weatherService: Weather,
-    private loggerService: Logger,
-    private cdr: ChangeDetectorRef
-  ) {
-    const savedCities = localStorage.getItem('topCities');
-
-    if (savedCities !== null) {
-      this.viewedCities = JSON.parse(savedCities);
-    }
-  }
+    private loggerService: Logger
+  ) {}
 
   ngOnInit() {
+    this.loadSavedViewedCities();
+    this.loadDefaultCity();
+    this.loadPlaces();
+  }
+
+  loadDefaultCity() {
+    this.loadWeather(this.defaultCityCode, this.defaultCityName);
+  }
+
+  loadPlaces() {
     this.weatherService.loadPlaces().subscribe({
       next: (places: Place[]) => {
         this.allPlaces = places;
-        console.log('Loaded places:', places.length);
-
-        this.loadDefaultCity();
-        this.cdr.detectChanges();
       },
       error: error => {
         console.error('Places loading failed:', error);
@@ -67,25 +70,14 @@ export class WeatherPage implements OnInit {
     });
   }
 
-  loadDefaultCity() {
-    const defaultPlace = this.allPlaces.find(place => place.code === 'vilnius');
-
-    if (defaultPlace) {
-      this.loadWeather(defaultPlace.code, defaultPlace.name, false);
-      return;
-    }
-
-    this.loadWeather('vilnius', 'Vilnius', false);
-  }
-
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchText = inputElement.value;
 
-    this.filterPlacesFromCache();
+    this.filterPlaces();
   }
 
-  filterPlacesFromCache() {
+  filterPlaces() {
     const search = this.searchText.toLowerCase().trim();
 
     if (search.length < 2) {
@@ -94,24 +86,39 @@ export class WeatherPage implements OnInit {
     }
 
     this.filteredPlaces = this.allPlaces
-      .filter(place =>
-        place.name.toLowerCase().includes(search) ||
-        place.code.toLowerCase().includes(search) ||
-        place.administrativeDivision?.toLowerCase().includes(search)
-      )
+      .filter(place => this.placeMatchesSearch(place, search))
       .slice(0, 20);
+  }
 
-    this.cdr.detectChanges();
+  placeMatchesSearch(place: Place, search: string): boolean {
+    return (
+      place.name.toLowerCase().includes(search) ||
+      place.code.toLowerCase().includes(search) ||
+      place.administrativeDivision?.toLowerCase().includes(search) === true
+    );
   }
 
   onEnter(event: Event) {
     const keyboardEvent = event as KeyboardEvent;
     keyboardEvent.preventDefault();
 
-    this.filterPlacesFromCache();
+    const search = this.searchText.toLowerCase().trim();
 
-    if (this.filteredPlaces.length > 0) {
-      this.selectPlace(this.filteredPlaces[0]);
+    if (search.length < 2) {
+      return;
+    }
+
+    this.filterPlaces();
+
+    const exactPlace = this.allPlaces.find(place =>
+      place.name.toLowerCase() === search ||
+      place.code.toLowerCase() === search
+    );
+
+    const selectedPlace = exactPlace || this.filteredPlaces[0];
+
+    if (selectedPlace) {
+      this.selectPlace(selectedPlace);
     }
   }
 
@@ -126,42 +133,32 @@ export class WeatherPage implements OnInit {
     this.filteredPlaces = [];
 
     this.saveViewedCity(place);
-
-    this.loggerService.logCity(place.name).subscribe({
-      error: error => console.error('Logging city failed:', error)
-    });
-
-    this.loadWeather(place.code, place.name, true);
+    this.logSelectedCity(place.name);
+    this.loadWeather(place.code, place.name);
   }
 
   selectViewedCity(viewedCity: ViewedCity) {
-    if (!viewedCity || !viewedCity.code) {
-      console.error('Invalid viewed city:', viewedCity);
-      return;
-    }
+    const place: Place = {
+      name: viewedCity.city,
+      code: viewedCity.code
+    };
 
-    this.filteredPlaces = [];
-
-    this.loadWeather(viewedCity.code, viewedCity.city, true);
+    this.selectPlace(place);
   }
 
-  loadWeather(placeCode: string, cityName: string, updateSearch = true) {
+  loadWeather(placeCode: string, cityName: string) {
     this.selectedCity = cityName;
-
-    if (updateSearch) {
-      this.searchText = cityName;
-    }
+    this.searchText = cityName;
 
     this.currentWeather = null;
+    this.forecastTimestamps = [];
     this.savedFiveDaysForecast = [];
 
     this.weatherService.getWeather(placeCode).subscribe({
-      next: (response: any) => {
+      next: response => {
         this.forecastTimestamps = response.forecastTimestamps;
-        this.currentWeather = response.forecastTimestamps[0];
-        this.savedFiveDaysForecast = this.fiveDaysForecast();
-
-        this.cdr.detectChanges();
+        this.currentWeather = this.forecastTimestamps[0];
+        this.savedFiveDaysForecast = this.getFiveDaysForecast();
       },
       error: error => {
         console.error('Weather loading failed:', error);
@@ -169,16 +166,16 @@ export class WeatherPage implements OnInit {
     });
   }
 
-  fiveDaysForecast() {
+  getFiveDaysForecast(): any[] {
     const usedDates: string[] = [];
     const fiveDays: any[] = [];
 
-    for (let i = 0; i < this.forecastTimestamps.length; i++) {
-      const forecastDate = this.forecastTimestamps[i].forecastTimeUtc.split(' ')[0];
+    for (const forecast of this.forecastTimestamps) {
+      const forecastDate = forecast.forecastTimeUtc.split(' ')[0];
 
       if (!usedDates.includes(forecastDate)) {
         usedDates.push(forecastDate);
-        fiveDays.push(this.forecastTimestamps[i]);
+        fiveDays.push(forecast);
       }
 
       if (fiveDays.length === 5) {
@@ -190,23 +187,48 @@ export class WeatherPage implements OnInit {
   }
 
   saveViewedCity(place: Place) {
-    const storedCity = this.viewedCities.find(
+    const savedCity = this.viewedCities.find(
       viewedCity => viewedCity.code === place.code
     );
 
-    if (storedCity === undefined) {
+    if (savedCity) {
+      savedCity.count++;
+    } else {
       this.viewedCities.push({
         city: place.name,
         code: place.code,
         count: 1
       });
-    } else {
-      storedCity.count++;
     }
 
     this.viewedCities.sort((a, b) => b.count - a.count);
     this.viewedCities = this.viewedCities.slice(0, 3);
 
-    localStorage.setItem('topCities', JSON.stringify(this.viewedCities));
+    localStorage.setItem(
+      this.localStorageKey,
+      JSON.stringify(this.viewedCities)
+    );
+  }
+
+  loadSavedViewedCities() {
+    const savedCities = localStorage.getItem(this.localStorageKey);
+
+    if (!savedCities) {
+      return;
+    }
+
+    try {
+      this.viewedCities = JSON.parse(savedCities);
+    } catch {
+      this.viewedCities = [];
+    }
+  }
+
+  logSelectedCity(cityName: string) {
+    this.loggerService.logCity(cityName).subscribe({
+      error: error => {
+        console.error('City logging failed:', error);
+      }
+    });
   }
 }
