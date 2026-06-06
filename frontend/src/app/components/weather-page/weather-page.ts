@@ -65,11 +65,11 @@ export class WeatherPage implements OnInit {
   }
 
   getDayName(dateString: string): string {
-  const fixedDate = dateString.replace(' ', 'T');
-  const date = new Date(fixedDate);
+    const fixedDate = dateString.replace(' ', 'T');
+    const date = new Date(fixedDate);
 
-  return date.toLocaleDateString('en-US', {
-    weekday: 'long'
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long'
   });
 }
 
@@ -84,6 +84,7 @@ export class WeatherPage implements OnInit {
       }
     });
   }
+
   onSearch(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.searchText = inputElement.value;
