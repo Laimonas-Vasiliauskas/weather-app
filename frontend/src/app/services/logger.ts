@@ -20,17 +20,4 @@ export class Logger {
     );
   }
 }
-export function logCity(cityName: string): Promise<any> {
-  const url = `https://weather-app-vuq7.onrender.com/api/log`;
-  return fetch(url, {method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ city: cityName }),
-  }).then((response) => {
-    if (!response.ok) {
-      return response.text().then((text) => {
-        throw new Error(`Logging city failed: ${response.status} ${text}`);
-      });
-    }
-    return response.json();
-  });
-}
 
