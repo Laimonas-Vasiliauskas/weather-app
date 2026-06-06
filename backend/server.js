@@ -96,6 +96,40 @@ app.post('/api/log', async (req, res) => {
   }
 });
 
+// Get all city logs
+app.get('/api/logs', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT id, city, created_at
+      FROM city_logs
+      ORDER BY created_at DESC
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Logs loading failed:', error);
+    res.status(500).json({ message: 'Failed to load logs' });
+  }
+});
+
+// Get top 3 most searched cities
+app.get('/api/top-cities', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT city, COUNT(*)::int AS views
+      FROM city_logs
+      GROUP BY city
+      ORDER BY views DESC
+      LIMIT 3
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Top cities loading failed:', error);
+    res.status(500).json({ message: 'Failed to load top cities' });
+  }
+});
+
 // Start server
 async function startServer() {
   try {
