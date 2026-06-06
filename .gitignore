@@ -10,3 +10,4 @@ frontend/.angular/
 backend/node_modules/
 
 .env
+README.md
